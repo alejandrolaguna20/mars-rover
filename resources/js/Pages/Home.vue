@@ -1,89 +1,187 @@
-<script setup>
-import { ref } from 'vue';
+<template>
+    <div class="min-h-screen bg-[#0a0e17] text-slate-200 p-4 md:p-8 font-sans">
+        <app-header :tabs="tabs" :activeTab="activeTab" @tab-changed="activeTab = $event" />
 
-const count = ref(0);
-const name = ref('');
-const darkMode = ref(false);
+        <main class="max-w-6xl mx-auto">
+            <div v-if="activeTab === 'dashboard'" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 space-y-6">
+                    <surface-map :grid="grid" />
 
-const increment = () => {
-  count.value++;
-};
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <rover-status :position="position" :direction="direction" :currentSector="currentSector"
+                            :progress="progress" />
+                        <mission-log :missionLogs="missionLogs" />
+                    </div>
+                </div>
 
-const decrement = () => {
-  count.value--;
-};
+                <div class="space-y-6">
+                    <command-center v-model:commandSequence="commandSequence" :error="error" @clear="clearCommands"
+                        @add-command="addCommand" @send="sendCommands" />
+                    <quick-actions :actions="quickActions" />
+                    <system-status />
+                </div>
+            </div>
+
+            <div v-else-if="activeTab === 'map'" class="space-y-6 h-full flex flex-col">
+                <surface />
+            </div>
+
+            <div v-else-if="activeTab === 'science'" class="space-y-6">
+                <science-data />
+            </div>
+
+            <div v-else-if="activeTab === 'perseverance-rover'" class="space-y-6">
+                <connected-rover />
+            </div>
+
+            <div v-else-if="activeTab === 'opportunity-rover'" class="space-y-6">
+                <disconnected-rover />
+            </div>
+            <div v-else-if="activeTab === 'weather'" class="space-y-6">
+                <weather-data />
+            </div>
+        </main>
+    </div>
+</template>
+
+<script>
+import AppHeader from '../components/layout/AppHeader.vue';
+import SurfaceMap from '../components/map/SurfaceMap.vue';
+import RoverStatus from '../components/rover/RoverStatus.vue';
+import MissionLog from '../components/rover/MissionLog.vue';
+import CommandCenter from '../components/rover/CommandCenter.vue';
+import QuickActions from '../components/rover/QuickActions.vue';
+import SystemStatus from '../components/system/SystemStatus.vue';
+import ConnectedRover from '../components/tabs/ConnectedRover.vue';
+import DisconnectedRover from '../components/tabs/DisconnectedRover.vue';
+import WeatherData from '../components/tabs/WeatherData.vue';
+import Surface from '../components/tabs/Surface.vue';
+import ScienceData from '../components/tabs/ScienceData.vue';
+
+export default {
+    name: 'Dashboard',
+    components: {
+        AppHeader,
+        SurfaceMap,
+        RoverStatus,
+        MissionLog,
+        CommandCenter,
+        QuickActions,
+        SystemStatus,
+        ConnectedRover,
+        DisconnectedRover,
+        WeatherData,
+        Surface,
+        ScienceData,
+    },
+    data() {
+        return {
+            activeTab: 'dashboard',
+            tabs: [
+                { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+                { id: 'map', label: 'Surface Map', icon: '🗺️' },
+                { id: 'science', label: 'Science Data', icon: '🔬' },
+                { id: 'perseverance-rover', label: 'Perseverance Rover', icon: '🤖' },
+                { id: 'opportunity-rover', label: 'Opportunity Rover', icon: '🤖' },
+                { id: 'weather', label: 'Weather', icon: '🌡️' }
+            ],
+            commandSequence: '',
+            error: null,
+            position: { x: 42, y: 17 },
+            direction: 'E',
+            currentSector: 'B-7',
+            progress: 65,
+            missionLogs: [
+                { time: '14:30', message: 'Obstacle detected', details: 'Coordinates: (12, 34). Adjusting path.' },
+                { time: '14:28', message: 'Sample collected', details: 'Rock sample #42 from sector B-7' },
+                { time: '14:25', message: 'Movement command executed', details: 'FFRLF completed successfully' },
+                { time: '14:20', message: 'New photo captured', details: 'Panoramic view of crater' },
+                { time: '14:15', message: 'Solar charge started', details: 'Battery at 85%' }
+            ],
+            quickActions: [
+                { id: 'photo', label: 'Take Photo', icon: '📸' },
+                { id: 'sample', label: 'Collect Sample', icon: '🧪' },
+                { id: 'scan', label: 'Run Scan', icon: '🔍' },
+                { id: 'home', label: 'Return Home', icon: '🏠' },
+                { id: 'charge', label: 'Solar Charge', icon: '☀️' },
+                { id: 'emergency', label: 'Emergency Stop', icon: '🛑' }
+            ],
+            grid: Array(100).fill().map((_, i) => {
+                const x = i % 10
+                const y = Math.floor(i / 10)
+                let type = 'empty'
+                // Place rover at (4,2)
+                if (x === 4 && y === 2) type = 'rover'
+                // Place landing at (0,0)
+                else if (x === 0 && y === 0) type = 'landing'
+                // Random obstacles (10% chance)
+                else if (Math.random() < 0.1 && !(x === 4 && y === 2)) type = 'obstacle'
+                return { type }
+            })
+        }
+    },
+    methods: {
+        addCommand(cmd) {
+            this.commandSequence += cmd
+        },
+        clearCommands() {
+            this.commandSequence = ''
+            this.error = null
+        },
+        sendCommands() {
+            // Implement command sending logic
+            console.log('Sending commands:', this.commandSequence)
+            // Simulate error for demo
+            if (Math.random() > 0.7) {
+                this.error = "Obstacle detected at position (12, 34)! Commands aborted."
+            } else {
+                this.error = null
+                // Here you would normally call an API
+            }
+        }
+        // NOTE: This would be a nice option for a "growing" amount of tabs, or an unknown amount of them
+        // as this solution would be more... maintainable and readable. for the sake of simplicity, I decided not to go with it
+        // but it is still a great solution in any case.
+        //
+        //  getComponentForTab(tabId) {
+        //      const componentMap = {
+        //          'dashboard': DashboardView,
+        //          'map': MapView,
+        //          'science': ScienceView,
+        //          'rover1': Rover1View,
+        //          'rover2': Rover2View,
+        //          'weather': WeatherView
+        //      };
+
+        //      return componentMap[tabId] || DashboardView;
+        //  }
+    }
+}
 </script>
 
-<template>
-  <div class="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-6">
-      <h1 class="text-3xl font-bold text-center text-indigo-600 mb-6">
-        Welcome to my Inertia-powered Laravel + Vue app!
-      </h1>
 
-      <div class="mb-6">
-        <p class="text-gray-700 mb-4">This is a reactive counter example to verify Vue is working:</p>
+<style>
+/* Custom scrollbar styles */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
 
-        <div class="flex items-center justify-center space-x-4 mb-4">
-          <button
-            @click="decrement"
-            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200"
-          >
-            -
-          </button>
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
 
-          <span class="text-2xl font-bold">{{ count }}</span>
+.scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+}
 
-          <button
-            @click="increment"
-            class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-200"
-          >
-            +
-          </button>
-        </div>
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: #374151;
+    border-radius: 2px;
+}
 
-        <div class="mb-6">
-          <label class="block text-gray-700 mb-2">Enter your name:</label>
-          <input
-            v-model="name"
-            type="text"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="Type your name here"
-          />
-        </div>
-
-        <div v-if="name" class="mt-4 p-4 bg-indigo-50 rounded-lg">
-          <p class="text-indigo-800">
-            Hello, <span class="font-bold">{{ name }}</span>!
-            You have clicked the buttons <span class="font-bold">{{ count }}</span> times.
-          </p>
-        </div>
-
-        <div class="mt-6">
-          <div class="flex items-center mb-2">
-            <input
-              v-model="darkMode"
-              type="checkbox"
-              id="darkMode"
-              class="mr-2"
-            />
-            <label for="darkMode" class="text-gray-700">Toggle card color</label>
-          </div>
-
-          <div
-            :class="[
-              'mt-4 p-4 rounded-lg transition-colors duration-200',
-              darkMode ? 'bg-gray-800 text-white' : 'bg-blue-100 text-blue-800'
-            ]"
-          >
-            <p>This card changes color based on the toggle state!</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-8 text-center text-gray-500 text-sm">
-        If you can see this styled interface and interact with it, both Vue and Tailwind are working correctly!
-      </div>
-    </div>
-  </div>
-</template>
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #4B5563;
+    border-radius: 2px;
+}
+</style>

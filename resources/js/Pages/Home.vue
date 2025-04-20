@@ -1,6 +1,6 @@
 <template>
     <div class="min-h-screen bg-[#0a0e17] text-slate-200 p-4 md:p-8 font-sans">
-        <app-header :tabs="tabs" :activeTab="activeTab" @tab-changed="activeTab = $event" />
+        <app-header :name="name" :tabs="tabs" :activeTab="activeTab" @tab-changed="activeTab = $event" />
 
         <main class="max-w-6xl mx-auto">
             <div v-if="activeTab === 'dashboard'" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -73,6 +73,9 @@ export default {
         WeatherData,
         Surface,
         ScienceData,
+    },
+    props: {
+        name: String,
     },
     data() {
         return {

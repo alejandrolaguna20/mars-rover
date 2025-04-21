@@ -79,7 +79,7 @@ export default {
         toggleDropdown() {
             this.dropdownOpen = !this.dropdownOpen;
         },
-        logout(): void {
+        logout() {
             router.post('/logout', {}, {
                 onSuccess: () => router.visit('/login'),
                 onError: () => alert('Logout failed'),

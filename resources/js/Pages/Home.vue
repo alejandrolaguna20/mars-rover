@@ -58,6 +58,8 @@ import WeatherData from '../components/tabs/WeatherData.vue';
 import Surface from '../components/tabs/Surface.vue';
 import ScienceData from '../components/tabs/ScienceData.vue';
 
+import { router } from '@inertiajs/vue3';
+
 export default {
     name: 'Dashboard',
     components: {
@@ -76,6 +78,7 @@ export default {
     },
     props: {
         name: String,
+        missionLogs: Array,
     },
     data() {
         return {
@@ -94,13 +97,6 @@ export default {
             direction: 'E',
             currentSector: 'B-7',
             progress: 65,
-            missionLogs: [
-                { time: '14:30', message: 'Obstacle detected', details: 'Coordinates: (12, 34). Adjusting path.' },
-                { time: '14:28', message: 'Sample collected', details: 'Rock sample #42 from sector B-7' },
-                { time: '14:25', message: 'Movement command executed', details: 'FFRLF completed successfully' },
-                { time: '14:20', message: 'New photo captured', details: 'Panoramic view of crater' },
-                { time: '14:15', message: 'Solar charge started', details: 'Battery at 85%' }
-            ],
             quickActions: [
                 { id: 'photo', label: 'Take Photo', icon: '📸' },
                 { id: 'sample', label: 'Collect Sample', icon: '🧪' },
@@ -233,23 +229,14 @@ export default {
                 message,
                 details
             });
-        }
-        // NOTE: This would be a nice option for a "growing" amount of tabs, or an unknown amount of them
-        // as this solution would be more... maintainable and readable. for the sake of simplicity, I decided not to go with it
-        // but it is still a great solution in any case.
-        //
-        //  getComponentForTab(tabId) {
-        //      const componentMap = {
-        //          'dashboard': DashboardView,
-        //          'map': MapView,
-        //          'science': ScienceView,
-        //          'rover1': Rover1View,
-        //          'rover2': Rover2View,
-        //          'weather': WeatherView
-        //      };
 
-        //      return componentMap[tabId] || DashboardView;
-        //  }
+            router.post('/update-logs', {
+                message: message,
+                details: details,
+            }, {
+                preserveState: true,
+            });
+        }
     }
 }
 </script>

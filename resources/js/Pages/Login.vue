@@ -84,9 +84,7 @@ export default {
                 name: this.name,
                 password: this.password,
             }, {
-                onSuccess: () => {
-                    console.log('Logged in successfully');
-                },
+                onSuccess: () => router.visit('/dashboard'),
                 onError: (errors) => {
                     this.errors = errors;
                 },

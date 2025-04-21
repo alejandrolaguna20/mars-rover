@@ -84,7 +84,7 @@ export default {
                 name: this.name,
                 password: this.password,
             }, {
-                onSuccess: () => router.visit('/dashboard'),
+                onSuccess: () => router.visit('/'),
                 onError: (errors) => {
                     this.errors = errors;
                 },

@@ -6,24 +6,49 @@
                 <p class="text-xs text-slate-400 mt-0.5">Terrain scan updated: 14:15 MTC</p>
             </div>
             <div class="flex space-x-2">
-                <button
-                    class="p-1.5 bg-[#1a2333] rounded text-slate-400 hover:text-white transition-all border border-[#2a3546]">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                    </svg>
-                </button>
-                <button
-                    class="p-1.5 bg-[#1a2333] rounded text-slate-400 hover:text-white transition-all border border-[#2a3546]">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                    </svg>
-                </button>
+                <div
+                    class="relative w-20 h-20 bg-[#1a1f33] border-2 border-[#242d3f] rounded-full flex items-center justify-center">
+                    <!-- Cardinal Directions -->
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span id="dir-north"
+                            class="absolute top-2 pl-[1px] font-semibold text-slate-400 text-xs font-medium">N</span>
+                        <span id="dir-south" class="absolute bottom-2 font-semibold text-xs text-slate-400">S</span>
+                        <span id="dir-west" class="absolute left-2 font-semibold text-xs text-slate-400">W</span>
+                        <span id="dir-east" class="absolute right-2 font-semibold text-xs text-slate-400">E</span>
+                    </div>
+
+                    <!-- Secondary Directions -->
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <span id="dir-northeast" class="absolute text-[0.6rem] text-slate-400/80"
+                            style="transform: rotate(45deg) translateY(-28px) rotate(-45deg)">NE</span>
+                        <span id="dir-southeast" class="absolute text-[0.6rem] text-slate-400/80"
+                            style="transform: rotate(135deg) translateY(-28px) rotate(-135deg)">SE</span>
+                        <span id="dir-southwest" class="absolute text-[0.6rem] text-slate-400/80"
+                            style="transform: rotate(225deg) translateY(-28px) rotate(-225deg)">SW</span>
+                        <span id="dir-northwest" class="absolute text-[0.6rem] text-slate-400/80"
+                            style="transform: rotate(315deg) translateY(-28px) rotate(-315deg)">NW</span>
+                    </div>
+
+                    <!-- Center Elements -->
+                    <div class="w-14 h-14 bg-[#1a2333] rounded-full flex items-center justify-center">
+                        <div class="w-8 h-8 bg-blue-500/20 rounded-full relative">
+                            <div class="absolute inset-0 rounded-full bg-blue-500/10 animate-pulse"></div>
+
+                            <!-- Center Dot -->
+                            <div
+                                class="absolute top-1/2 left-1/2 w-1.5 h-1.5 -mt-0.75 -ml-0.75 bg-blue-400 rounded-full">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Degree Markers -->
+                    <div v-for="angle in [0, 45, 90, 135, 180, 225, 270, 315]" :key="`marker-${angle}`"
+                        class="absolute w-px h-2" :class="angle % 90 === 0 ? 'bg-blue-400/30' : 'bg-slate-400/20'"
+                        :style="{ transform: `rotate(${angle}deg) translateY(-30px)` }"></div>
+                </div>
             </div>
         </div>
+
         <div class="p-4 bg-[#0a0e17]">
             <div class="grid grid-cols-10 gap-1 w-max mx-auto">
                 <div v-for="(cell, index) in grid" :key="index"
@@ -43,7 +68,7 @@
                     <span v-if="index % 10 === 0 && Math.floor(index / 10) % 2 === 0"
                         class="absolute -left-6 text-xs text-slate-500">{{ Math.floor(index / 10) }}</span>
                     <span v-if="index < 10 && index % 2 === 0" class="absolute -top-6 text-xs text-slate-500">{{ index
-                        }}</span>
+                    }}</span>
                 </div>
             </div>
         </div>
@@ -72,3 +97,29 @@ export default {
     }
 }
 </script>
+
+<style>
+/* Direction-specific styling using IDs */
+#dir-north {
+    transform: translateY(-50%);
+}
+
+#dir-south {
+    transform: translateY(50%);
+}
+
+#dir-west {
+    transform: translateX(-50%);
+}
+
+#dir-east {
+    transform: translateX(50%);
+}
+
+#dir-northeast,
+#dir-southeast,
+#dir-southwest,
+#dir-northwest {
+    font-size: 0.6rem;
+}
+</style>
